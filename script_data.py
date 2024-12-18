@@ -6,7 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 
-st.title("THE ESBEE APP")
+st.title("MOAT SCRAPPER")
 # st.divider()
 
 # File uploader
