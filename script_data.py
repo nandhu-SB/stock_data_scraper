@@ -45,8 +45,8 @@ if uploaded_file:
                     else:
                         return {"Error": "Company ratios section not found"}
                 elif response.status_code == 429:
-                    with logs:
-                        st.sidebar.write(f"Rate limited. Retrying after {backoff_time} seconds. URL: {url}")
+                    # with logs:
+                    #     st.sidebar.write(f"Rate limited. Retrying after {backoff_time} seconds. URL: {url}")
                     time.sleep(backoff_time)
                     backoff_time *= 2  # Double the backoff time for the next attempt
                 else:
