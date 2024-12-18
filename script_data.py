@@ -96,8 +96,7 @@ if uploaded_file:
         def fetch_ratios_for_row(row):
             url = f"https://www.screener.in/company/{row[url_column]}/consolidated"
             ratios = fetch_all_ratios(url)
-            with logs:
-                st.write(f"Fetching URL : {url}")
+
             # ratios['URL'] = url  # Add URL for reference/debugging
             return ratios
 
