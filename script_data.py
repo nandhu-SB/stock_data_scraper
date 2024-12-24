@@ -44,6 +44,7 @@ if uploaded_file:
                         return ratios
                     else:
                         return {"Error": "Company ratios section not found"}
+                    current_price=soup.find("div",class_="")
                 elif response.status_code == 429:
                     # with logs:
                     #     st.sidebar.write(f"Rate limited. Retrying after {backoff_time} seconds. URL: {url}")
