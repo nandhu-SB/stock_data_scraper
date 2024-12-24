@@ -3,3 +3,4 @@ requests
 openpyxl
 xlsxwriter
 nselib
+st-gsheets-connection
