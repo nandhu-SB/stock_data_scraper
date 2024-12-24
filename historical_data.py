@@ -30,34 +30,42 @@ def fetch_ticker_period_data(data_info, ticker, period):
         return pd.DataFrame()
 
 # Sidebar inputs
-tickers = st.sidebar.text_area("Tickers (comma-separated)", "TECHM, INFY, TCS").split(",")
-tickers = [ticker.strip() for ticker in tickers if ticker.strip()]  # Clean up whitespace
-period_ = st.sidebar.selectbox("Period", options=("1M", "1W", "1Y"))
+# tickers = st.sidebar.text_area("Tickers (comma-separated)", "TECHM, INFY, TCS").split(",")
+# tickers=st.sidebar.input("Upload Excel")
+# tickers = [ticker.strip() for ticker in tickers if ticker.strip()]  # Clean up whitespace
+uploaded_file = st.sidebar.file_uploader("Upload Excel", type=['xlsx', 'xls'])
+if uploaded_file:
+    df=pd.read_excel(uploaded_file)
+    period_ = st.sidebar.selectbox("Period", options=("1M", "1W", "1Y"))
+    if not df.empty:
+        tickers=st.sidebar.selectbox("Select Column with Symbols",options=(df.columns.tolist()))
 
-# Initialize an empty DataFrame
-merged_data = pd.DataFrame()
 
-# Fetch and merge data for each ticker
-if tickers and period_:
-    for ticker in tickers:
-        data = fetch_ticker_period_data("price_volume_and_deliverable_position_data", ticker, period_)
-        if not data.empty:
-            data = data[["Date", "ClosePrice"]].rename(columns={"ClosePrice": f"{ticker}_ClosePrice"})
-            if merged_data.empty:
-                merged_data = data
+if st.sidebar.button("Proceed"):
+    # Initialize an empty DataFrame
+    merged_data = pd.DataFrame()
+
+    # Fetch and merge data for each ticker
+    if tickers and period_:
+        for ticker in df[tickers]:
+            data = fetch_ticker_period_data("price_volume_and_deliverable_position_data", ticker, period_)
+            if not data.empty:
+                data = data[["Date", "ClosePrice"]].rename(columns={"ClosePrice": f"{ticker}_ClosePrice"})
+                if merged_data.empty:
+                    merged_data = data
+                else:
+                    merged_data = pd.merge(merged_data, data, on="Date", how="outer")
             else:
-                merged_data = pd.merge(merged_data, data, on="Date", how="outer")
+                st.warning(f"No data available for ticker: {ticker}")
+
+        # Display merged data
+        if not merged_data.empty:
+            # merged_data.sort_values("Date", inplace=True)  # Ensure the data is sorted by date
+            st.dataframe(merged_data)
+
+            # Allow downloading of merged data
+            download_data(merged_data)
         else:
-            st.warning(f"No data available for ticker: {ticker}")
-
-    # Display merged data
-    if not merged_data.empty:
-        merged_data.sort_values("Date", inplace=True)  # Ensure the data is sorted by date
-        st.dataframe(merged_data)
-
-        # Allow downloading of merged data
-        download_data(merged_data)
+            st.warning("No data available for the selected tickers and period.")
     else:
-        st.warning("No data available for the selected tickers and period.")
-else:
-    st.info("Please enter at least one ticker and select a period.")
+        st.info("Please enter at least one ticker and select a period.")
