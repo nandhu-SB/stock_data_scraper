@@ -26,28 +26,31 @@ def fetch_ticker_period_data(data_info, ticker, period):
     try:
         return getattr(capital_market, data_info)(ticker, period=period)
     except Exception as e:
-        st.error(f"Error fetching data for {ticker}: {e}")
         return pd.DataFrame()
 
 # Sidebar inputs
-# tickers = st.sidebar.text_area("Tickers (comma-separated)", "TECHM, INFY, TCS").split(",")
-# tickers=st.sidebar.input("Upload Excel")
-# tickers = [ticker.strip() for ticker in tickers if ticker.strip()]  # Clean up whitespace
 uploaded_file = st.sidebar.file_uploader("Upload Excel", type=['xlsx', 'xls'])
 if uploaded_file:
-    df=pd.read_excel(uploaded_file)
-    period_ = st.sidebar.selectbox("Period", options=("1M", "1W", "1Y"))
+    df = pd.read_excel(uploaded_file)
     if not df.empty:
-        tickers=st.sidebar.selectbox("Select Column with Symbols",options=(df.columns.tolist()))
+        ticker_column = st.sidebar.selectbox("Select Column with Symbols", options=df.columns.tolist())
+        tickers = df[ticker_column].dropna().unique().tolist()  # Extract unique tickers
+        period_ = st.sidebar.selectbox("Period", options=("1M", "1W", "1Y"))
+    else:
+        st.warning("Uploaded file is empty. Please upload a valid Excel file.")
+else:
+    tickers, period_ = None, None
 
-
-if st.sidebar.button("Proceed"):
-    # Initialize an empty DataFrame
+batch_size = 50  # Define batch size for processing
+if st.sidebar.button("Proceed") and tickers and period_:
     merged_data = pd.DataFrame()
 
-    # Fetch and merge data for each ticker
-    if tickers and period_:
-        for ticker in df[tickers]:
+    # Process tickers in batches
+    for i in range(0, len(tickers), batch_size):
+        batch = tickers[i:i + batch_size]
+        st.sidebar.info(f"Processing batch {i // batch_size + 1} of {len(tickers) // batch_size + 1}")
+
+        for ticker in batch:
             data = fetch_ticker_period_data("price_volume_and_deliverable_position_data", ticker, period_)
             if not data.empty:
                 data = data[["Date", "ClosePrice"]].rename(columns={"ClosePrice": f"{ticker}_ClosePrice"})
@@ -55,17 +58,13 @@ if st.sidebar.button("Proceed"):
                     merged_data = data
                 else:
                     merged_data = pd.merge(merged_data, data, on="Date", how="outer")
-            else:
-                st.warning(f"No data available for ticker: {ticker}")
 
-        # Display merged data
-        if not merged_data.empty:
-            # merged_data.sort_values("Date", inplace=True)  # Ensure the data is sorted by date
-            st.dataframe(merged_data)
-
-            # Allow downloading of merged data
-            download_data(merged_data)
-        else:
-            st.warning("No data available for the selected tickers and period.")
+    # Display merged data
+    if not merged_data.empty:
+        merged_data.sort_values("Date", inplace=True)
+        st.dataframe(merged_data)
+        download_data(merged_data)
     else:
-        st.info("Please enter at least one ticker and select a period.")
+        st.warning("No data available for the selected tickers and period.")
+else:
+    st.info("Please upload a file, select a column, and click Proceed.")
