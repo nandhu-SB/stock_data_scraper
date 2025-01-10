@@ -1,0 +1,40 @@
+Date: 9/1/2025
+Time: 9:53
+Phone Number: +919746968817
+Message: Hello, this is a message sent from Python!
+--------------------
+Date: 9/1/2025
+Time: 10:7
+Phone Number: +919746968817
+Message: Hey All!
+--------------------
+Date: 9/1/2025
+Time: 10:8
+Group ID: Nandhana
+Message: Hey All!
+--------------------
+Date: 9/1/2025
+Time: 10:10
+Group ID: testGroup
+Message: test
+--------------------
+Date: 9/1/2025
+Time: 10:11
+Group ID: CwjSkCPbxuJJzOI2MgK91u
+Message: test
+--------------------
+Date: 9/1/2025
+Time: 10:12
+Group ID: CwjSkCPbxuJJzOI2MgK91u
+Message: test
+--------------------
+Date: 9/1/2025
+Time: 10:13
+Group ID: CwjSkCPbxuJJzOI2MgK91u
+Message: test
+--------------------
+Date: 9/1/2025
+Time: 10:19
+Group ID: CwjSkCPbxuJJzOI2MgK91u
+Message: test
+--------------------

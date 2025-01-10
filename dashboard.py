@@ -6,7 +6,21 @@ import numpy as np
 import plotly.graph_objects as go
 from alpha_vantage.fundamentaldata import FundamentalData
 from stocknews import StockNews
+from io import BytesIO 
 #my code
+# Function to download data
+def download_data(data, file_name="Data.xlsx"):
+    excel_file = BytesIO()
+    with pd.ExcelWriter(excel_file, engine='xlsxwriter') as writer:
+        data.to_excel(writer, index=True, sheet_name="Sheet1")
+    excel_file.seek(0)
+    st.sidebar.download_button(
+        label="Download",
+        data=excel_file,
+        file_name=file_name,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 
 st.title("Stock Dasboard")
 market=st.sidebar.selectbox("Choose Market",options=("NSE","Global"))
@@ -28,6 +42,8 @@ else:
         if data.empty:
             st.error("No data available for the provided ticker and dates")
         else:
+            download_data(data)
+
             with charts:
 
                 if isinstance(data.columns, pd.MultiIndex):
