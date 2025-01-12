@@ -8,54 +8,33 @@ st.title("MOAT-NEWS ENGINE 🐍")
 
 st.markdown("""
     <style>
-    /* Style for the page */
-    body {
-        font-family: 'Arial', sans-serif;
-    }
-
-    /* Style for the titles */
-    .stTitle {
-        text-align: center;
-    }
-
-    /* Style for the cards */
+    body { font-family: 'Arial', sans-serif; }
+    .stTitle { text-align: center; }
     .card {
         border: 1px solid #D4AF37;
         border-radius: 15px;
         padding: 15px;
         margin: 10px;
         box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-        width: 250px;
-        height: 500px; /* Fixed height */
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: left;
         text-align: center;
-        overflow: hidden;
         position: relative;
+        overflow: hidden;
+        height: 350px; /* Set a fixed height for all cards */
     }
-
-    .card h4 {
-        font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-
+    .card h4 { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
     .card p {
         font-size: 1rem;
         margin-bottom: 20px;
-        flex-grow: 1;
-        max-height: calc(100% - 80px); /* Restrict max height to avoid overflow */
+        max-height: 80px;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
-        -webkit-line-clamp: 5; /* Limit the number of lines visible */
+        -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
-        mask-image: linear-gradient(to bottom, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0));
-        -webkit-mask-image: linear-gradient(to bottom, rgba(255, 255, 255, 1) 60%, rgba(255, 255, 255, 0));
     }
-
-    /* Footer for positioning published date and 'Read more' */
     .card-footer {
         position: absolute;
         bottom: 10px;
@@ -63,25 +42,13 @@ st.markdown("""
         right: 15px;
         display: flex;
         justify-content: space-around;
-        z-index: 2; /* Ensure footer stays above other content */
     }
-
-    .published-date {
-        # font-size: .4 rem;
-        # color: #777;
-        z-index: 2; /* Ensure published date is visible */
-    }
-
+    .published-date { font-size: 0.8rem; color: #777; }
     .read-more {
-        font-size: 0.8rem;
-        # color: #007BFF;
-        text-decoration: none;
-        z-index: 2; /* Ensure the 'Read more' link is visible */
+        font-size: 0.8rem; color: #007BFF; text-decoration: none;
     }
+    .read-more:hover { text-decoration: underline; }
 
-    .read-more:hover {
-        text-decoration: underline;
-    }
 
     /* Blur effect */
     .card::after {
@@ -98,11 +65,20 @@ st.markdown("""
     /* Hover effect for cards */
     .card:hover {
         transform: scale(1.02);
+        transition: transform 0.2s ease-in-out;
     }
     .highlight {
     background-color: yellow;
     color: black;
             }
+    @media (max-width: 768px) {
+        .card {
+            height: 200px; /* Set a smaller height for mobile devices */
+        }
+        .card p {
+            max-height: 50px; /* Adjust text block height for smaller cards */
+        }
+    }
     </style>
 """, unsafe_allow_html=True)
 
