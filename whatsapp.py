@@ -134,9 +134,9 @@ def search(df, term=""):
                 </div>
             """, unsafe_allow_html=True)
 
-all_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY", "&sheet=Sheet1")
-moat_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY", "&gid=1812473852")
-moat_source = load_data("1CbQQjrLPT25n2xnxuHRdOrI6K6MczA-Kh0BDraguniw", "&sheet=Sheet1")
+all_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY", "&sheet=Sheet1",cache_key)  
+moat_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY", "&gid=1812473852",cache_key)
+moat_source = load_data("1CbQQjrLPT25n2xnxuHRdOrI6K6MczA-Kh0BDraguniw", "&sheet=Sheet1",cache_key)
 
 all_news, moat_news = st.tabs(["All News", "Moat Stocks News"])
 
