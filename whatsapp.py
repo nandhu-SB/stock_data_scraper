@@ -3,8 +3,8 @@ import pandas as pd
 import re
 from datetime import datetime
 # Set up the page
-st.set_page_config(page_title="MOAT-NEWS ENGINE", page_icon="🐍", layout="wide", initial_sidebar_state="collapsed")
-st.title("MOAT-NEWS ENGINE 🐍")
+st.set_page_config(page_title="MOAT-NEWS ENGINE", layout="wide", initial_sidebar_state="collapsed")
+st.title("MOAT-NEWS ENGINE")
 st.sidebar.header("Moat Stocks")
 
 # Retained and optimized CSS styling
