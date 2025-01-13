@@ -14,6 +14,7 @@ st.markdown("""
     .stTitle { text-align: center; }
     #MainEnu{visibility:hidden;}
     #footer{visibility:hidden;}
+    header{visibility:hidden}
     .card {
         border: 1px solid #D4AF37;
         border-radius: 15px;
