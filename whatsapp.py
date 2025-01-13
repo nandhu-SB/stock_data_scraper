@@ -3,8 +3,45 @@ import pandas as pd
 import re
 from datetime import datetime
 # Set up the page
-st.set_page_config(page_title="MOAT-NEWS ENGINE", layout="wide", initial_sidebar_state="collapsed")
-st.title("MOAT-NEWS ENGINE")
+st.set_page_config(page_title="MOAT-NEWS ENGINE", layout="wide", page_icon="gallery\logo-moat-india-2.png",initial_sidebar_state="collapsed")
+# Add the logo at the top
+
+# Add custom CSS for sticky header
+st.markdown(
+    """
+    <style>
+    .sticky-header {
+        position: fixed;
+        top: 0;
+        color:white;
+        background-color: #0e1117;  /* Adjust background as needed */
+        border-radius:0 0 0 20px;
+   
+        width: 100%;
+
+        padding: 20px;
+        box-shadow: 0 10px 4px rgba(0, 0, 0, 0.5);
+        z-index: 100;
+    }
+    .main {
+        padding-top: 100px;  /* Prevents content from hiding behind the sticky header */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# Sticky header with logo and title
+st.markdown(
+    """
+    <div class="sticky-header">
+        <img src="gallery/logo-moat-india-2.png" width="80" style="vertical-align: middle;">
+        <h1 style="display: inline; vertical-align: middle; margin-left: 10px;">MOAT-NEWS ENGINE</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 st.sidebar.header("Moat Stocks")
 
 # Retained and optimized CSS styling
