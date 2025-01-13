@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import re
+from datetime import datetime
 # Set up the page
 st.set_page_config(page_title="MOAT-NEWS ENGINE", page_icon="🐍", layout="wide", initial_sidebar_state="collapsed")
 st.title("MOAT-NEWS ENGINE 🐍")
@@ -73,11 +74,19 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
+def generate_cache_key():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+# Generate a new cache key for each page refresh
+cache_key = generate_cache_key()
 
 @st.cache_data(show_spinner=False)
-def load_data(sheet_id, sheet_name):
+def load_data(sheet_id, sheet_name,cache_key):
     url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv{sheet_name}"
     return pd.read_csv(url, dtype=str).fillna("")
+
+
+
 
 def highlight_text(text, search_term):
     if not text or not search_term:
