@@ -185,3 +185,4 @@ with all_news:
 
 with moat_news:
     data_process(moat_df, "moat_news", stock_list_generator(moat_source))
+#comment
