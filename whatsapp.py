@@ -1,11 +1,12 @@
 import streamlit as st
-import pandas as  pd
-# import re
+import pandas as pd
+import re
 # Set up the page
 st.set_page_config(page_title="MOAT-NEWS ENGINE", page_icon="🐍", layout="wide", initial_sidebar_state="collapsed")
 st.title("MOAT-NEWS ENGINE 🐍")
 st.sidebar.header("Moat Stocks")
 
+# Retained and optimized CSS styling
 st.markdown("""
     <style>
     body { font-family: 'Arial', sans-serif; }
@@ -22,7 +23,7 @@ st.markdown("""
         text-align: center;
         position: relative;
         overflow: hidden;
-        height: 350px; /* Set a fixed height for all cards */
+        height: 350px;
     }
     .card h4 { font-size: 1.2rem; font-weight: bold; margin-bottom: 10px; }
     .card p {
@@ -44,232 +45,94 @@ st.markdown("""
         justify-content: space-around;
     }
     .published-date { font-size: 0.8rem; color: #777; }
-    .read-more {
-        font-size: 0.8rem; color: #007BFF; text-decoration: none;
-    }
+    .read-more { font-size: 0.8rem; color: #007BFF; text-decoration: none; }
     .read-more:hover { text-decoration: underline; }
-
-
-    /* Blur effect */
-    .card::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 50%;
-        # background: linear-gradient(to bottom, rgba(255, 215, 0, 0) 80%, rgba(255, 215, 0, 1) 100%);
-        pointer-events: none;
-    }
-
-    /* Hover effect for cards */
-    .card:hover {
-        transform: scale(1.02);
-        transition: transform 0.2s ease-in-out;
-    }
-    .highlight {
-    background-color: yellow;
-    color: black;
-            }
+    .card:hover { transform: scale(1.02); transition: transform 0.2s ease-in-out; }
+    .highlight { background-color: yellow; color: black; }
     @media (max-width: 768px) {
-        .card {
-            height: 200px; /* Set a smaller height for mobile devices */
-        }
-        .card p {
-            max-height: 50px; /* Adjust text block height for smaller cards */
-        }
+        .card { height: 200px; }
+        .card p { max-height: 50px; }
     }
-        /* Adjust the sidebar width */
-    [data-testid="stSidebar"] {
-        min-width: 200px; /* Minimum width */
-        max-width: 200px; /* Maximum width */
-    }
-
-
-    /* Optional: Style text in the sidebar */
-    [data-testid="stSidebar"] * {
-        font-size: 14px; /* Adjust font size */
-    }
-    /* Target all buttons in the sidebar */
+    [data-testid="stSidebar"] { min-width: 200px; max-width: 200px; }
+    [data-testid="stSidebar"] * { font-size: 14px; }
     [data-testid="stSidebar"] button[kind="secondary"] {
-        # background-color: #007BFF; /* Primary blue color */
-        # color: white;
         border: 1px solid #D4AF37;
         border-radius: 10px;
         padding: 8px 16px;
         font-size: 14px;
         font-weight: bold;
-        margin: 5px 0; /* Space between buttons */
+        margin: 5px 0;
         cursor: pointer;
-        transition: background-color 0.3s ease;
-
-        /* Ensure all buttons have the same width */
-        width: 100%; /* Makes buttons stretch to full width */
-        display: block; /* Ensures they behave like block elements */
-        text-align: center; /* Center-aligns the text */
+        width: 100%;
+        display: block;
+        text-align: center;
     }
-
-    /* Hover effect for buttons */
     [data-testid="stSidebar"] button[kind="secondary"]:hover {
-        background-color: #D4AF37; /* Darker blue on hover */
-        color:white;
+        background-color: #D4AF37;
+        color: white;
     }
-
     </style>
 """, unsafe_allow_html=True)
-@st.cache_data
-def load_data(sheet_id,sheet_name):
-    return pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv{sheet_name}", dtype=str).fillna("")
+
+@st.cache_data(show_spinner=False)
+def load_data(sheet_id, sheet_name):
+    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv{sheet_name}"
+    return pd.read_csv(url, dtype=str).fillna("")
 
 def highlight_text(text, search_term):
-    """
-    Highlight a search term in the given text using simple string matching.
-    
-    Parameters:
-        text (str): The text in which to search and highlight the term.
-        search_term (str): The term to highlight.
-        
-    Returns:
-        str: The text with the highlighted search term.
-    """
     if not text or not search_term:
-        return text  # Handle None, empty strings, or empty search term gracefully
-
-    # Case-insensitive highlighting by matching and replacing the term
-    lower_text = text.lower()
-    lower_search_term = search_term.lower()
-
-    start = 0
-    highlighted_text = ""
-
-    while True:
-        index = lower_text.find(lower_search_term, start)
-        if index == -1:
-            highlighted_text += text[start:]
-            break
-
-        # Append text up to the match and the highlighted match
-        highlighted_text += text[start:index] + f"<span class='highlight'>{text[index:index + len(search_term)]}</span>"
-        start = index + len(search_term)
-
-    return highlighted_text
-
+        return text
+    pattern = re.compile(re.escape(search_term), re.IGNORECASE)
+    return pattern.sub(lambda match: f"<span class='highlight'>{match.group(0)}</span>", text)
 
 def stock_list_generator(df):
     return df['COMPANY NAME'].unique()
 
+def data_process(df, key, stock_list):
+    search_key = "text_search"
+    if search_key not in st.session_state:
+        st.session_state[search_key] = ""
 
+    text_search = st.text_input("Search articles", value=st.session_state[search_key], key=f"text_{key}")
 
+    for stock in stock_list:
+        if st.sidebar.button(stock, key=f"{stock}_button_{key}"):  # Made key unique by adding tab key
+            st.session_state[search_key] = stock
+            text_search = stock
 
-def data_process(df,key,stock_list):
-        # Initialize session state for search if not already set
-        if f"text_search_{key}" not in st.session_state:
-            st.session_state[f"text_search_{key}"] = ""
+    search(df, text_search)
 
-        text_search = st.text_input("Search articles", value=st.session_state[f"text_search_{key}"], key=f"text_{key}")
-
-        if key=="all_news":
-            for stock in stock_list:
-                stock_button=st.sidebar.button(stock,key=f"{stock}_button_{key}")
-                if stock_button:
-                    st.session_state[f"text_search_{key}"] = stock
-                    text_search=stock
-            if text_search:
-                search(df,text_search)
-            else:
-                search(df)
-        else:
-          for stock in stock_list:
-            stock_button=st.sidebar.button(stock,key=f"{stock}_button_{key}")
-            if stock_button:
-                st.session_state[f"text_search_{key}"] = stock
-                text_search=stock
-            if text_search:
-                search(df,text_search)
-            else:
-                search(df)
-
-        
-
-
-
-def search(df,term=""):
-    # st.write(term)
-    lower_text_search = term.strip().lower()
-
+def search(df, term=""):
     search_columns = ["title", "description", "title_ent", "description_ent"]
-    if lower_text_search:
-        df_search=df[df[search_columns].apply(
-            lambda col: col.str.contains(lower_text_search, na=False, case=False)
-        ).any(axis=1)]
+    if term.strip():
+        df_search = df[df[search_columns].apply(lambda col: col.str.contains(term, case=False, na=False)).any(axis=1)]
     else:
         df_search = df
 
-    # Show the cards
     N_cards_per_row = 4
-    if term:
-        for n_row, row in df_search.reset_index().iterrows():
-            i = n_row%N_cards_per_row
-            if i==0:
-                st.write("---")
-                cols = st.columns(N_cards_per_row)
-            # draw the card
-            with cols[n_row%N_cards_per_row]:
-                st.markdown(f"""
-                    <div class="card">
-                        <h4>{highlight_text(row['title'], term)}</h4>
-                        <p>{highlight_text(row['description'], term)}</p>
-                        <div class="card-footer">
-                            <span class="published-date">{row['published_date']}</span>
-                            <a href="{row['link']}" class="read-more">Read more</a>
-                        </div>
+    for n_row, row in df_search.reset_index().iterrows():
+        if n_row % N_cards_per_row == 0:
+            cols = st.columns(N_cards_per_row)
+        with cols[n_row % N_cards_per_row]:
+            st.markdown(f"""
+                <div class="card">
+                    <h4>{highlight_text(row['title'], term)}</h4>
+                    <p>{highlight_text(row['description'], term)}</p>
+                    <div class="card-footer">
+                        <span class="published-date">{row['published_date']}</span>
+                        <a href="{row['link']}" target="_blank" class="read-more">Read more</a>
                     </div>
-                """, unsafe_allow_html=True)
-    if term=="":
-        for n_row, row in df.reset_index().iterrows():
-            i = n_row%N_cards_per_row
-            if i==0:
-                st.write("---")
-                cols = st.columns(N_cards_per_row)
-            # draw the card
-            with cols[n_row%N_cards_per_row]:
-                st.markdown(f"""
-                    <div class="card">
-                        <h4>{highlight_text(row['title'], term)}</h4>
-                        <p>{highlight_text(row['description'], term)}</p>
-                        <div class="card-footer">
-                            <span class="published-date">{row['published_date']}</span>
-                            <a href="{row['link']}" class="read-more">Read more</a>
-                        </div>
-                    </div>
-                """, unsafe_allow_html=True)
+                </div>
+            """, unsafe_allow_html=True)
 
+all_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY", "&sheet=Sheet1")
+moat_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY", "&gid=1812473852")
+moat_source = load_data("1CbQQjrLPT25n2xnxuHRdOrI6K6MczA-Kh0BDraguniw", "&sheet=Sheet1")
 
-
-
-
-# Define the tab options
-all_news,moat_news = st.tabs(["All News", "Moat Stocks News"])
-
-# Read the CSV data from the Google Sheet
-all_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY","&sheet=Sheet1")
-moat_df=load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY","&gid=1812473852")
-moat_source=load_data("1CbQQjrLPT25n2xnxuHRdOrI6K6MczA-Kh0BDraguniw","&sheet=Sheet1")
-
-
-
-
-
+all_news, moat_news = st.tabs(["All News", "Moat Stocks News"])
 
 with all_news:
-    data_process(all_df,"all_news",stock_list_generator(moat_source))
-    # st.dataframe(all_df)
+    data_process(all_df, "all_news", stock_list_generator(moat_source))
 
 with moat_news:
-    data_process(moat_df,"moat_news",stock_list_generator(moat_source))
-    # st.dataframe(moat_df)
-
-
-
-
-    
+    data_process(moat_df, "moat_news", stock_list_generator(moat_source))
