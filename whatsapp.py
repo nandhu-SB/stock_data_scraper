@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as  pd
 # import re
 # Set up the page
-st.set_page_config(page_title="MOAT-NEWS ENGINE", page_icon="🐍", layout="wide")
+st.set_page_config(page_title="MOAT-NEWS ENGINE", page_icon="🐍", layout="wide", initial_sidebar_state="collapsed")
 st.title("MOAT-NEWS ENGINE 🐍")
-# st.sidebar.header("Moat Stocks")
+st.sidebar.header("Moat Stocks")
 
 st.markdown("""
     <style>
@@ -79,9 +79,47 @@ st.markdown("""
             max-height: 50px; /* Adjust text block height for smaller cards */
         }
     }
+        /* Adjust the sidebar width */
+    [data-testid="stSidebar"] {
+        min-width: 200px; /* Minimum width */
+        max-width: 200px; /* Maximum width */
+    }
+
+
+    /* Optional: Style text in the sidebar */
+    [data-testid="stSidebar"] * {
+        font-size: 14px; /* Adjust font size */
+    }
+    /* Target all buttons in the sidebar */
+    [data-testid="stSidebar"] button[kind="secondary"] {
+        # background-color: #007BFF; /* Primary blue color */
+        # color: white;
+        border: 1px solid #D4AF37;
+        border-radius: 10px;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: bold;
+        margin: 5px 0; /* Space between buttons */
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+        /* Ensure all buttons have the same width */
+        width: 100%; /* Makes buttons stretch to full width */
+        display: block; /* Ensures they behave like block elements */
+        text-align: center; /* Center-aligns the text */
+    }
+
+    /* Hover effect for buttons */
+    [data-testid="stSidebar"] button[kind="secondary"]:hover {
+        background-color: #D4AF37; /* Darker blue on hover */
+        color:white;
+    }
+
     </style>
 """, unsafe_allow_html=True)
-
+@st.cache_data
+def load_data(sheet_id,sheet_name):
+    return pd.read_csv(f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv{sheet_name}", dtype=str).fillna("")
 
 def highlight_text(text, search_term):
     """
@@ -117,64 +155,95 @@ def highlight_text(text, search_term):
     return highlighted_text
 
 
-
-def url_generator(sheet_id,sheet_name):
-    return f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv{sheet_name}"
 def stock_list_generator(df):
     return df['COMPANY NAME'].unique()
+
+
+
+
 def data_process(df,key,stock_list):
+        # Initialize session state for search if not already set
+        if f"text_search_{key}" not in st.session_state:
+            st.session_state[f"text_search_{key}"] = ""
+
+        text_search = st.text_input("Search articles", value=st.session_state[f"text_search_{key}"], key=f"text_{key}")
+
+        if key=="all_news":
+            for stock in stock_list:
+                stock_button=st.sidebar.button(stock,key=f"{stock}_button_{key}")
+                if stock_button:
+                    st.session_state[f"text_search_{key}"] = stock
+                    text_search=stock
+            if text_search:
+                search(df,text_search)
+            else:
+                search(df)
+        else:
+          for stock in stock_list:
+            stock_button=st.sidebar.button(stock,key=f"{stock}_button_{key}")
+            if stock_button:
+                st.session_state[f"text_search_{key}"] = stock
+                text_search=stock
+            if text_search:
+                search(df,text_search)
+            else:
+                search(df)
+
         
-        text_search = st.text_input("Search articles", value="", key=f"text_{key}")
 
 
-        lower_text_search = text_search.strip().lower()
 
-        search_columns = ["title", "description", "title_ent", "description_ent"]
-        if lower_text_search:
-            df_search=df[df[search_columns].apply(
-                lambda col: col.str.contains(lower_text_search, na=False, case=False)
-            ).any(axis=1)]
-        else:
-            df_search = df
+def search(df,term=""):
+    # st.write(term)
+    lower_text_search = term.strip().lower()
 
-        # Show the cards
-        N_cards_per_row = 4
-        if text_search:
-            for n_row, row in df_search.reset_index().iterrows():
-                i = n_row%N_cards_per_row
-                if i==0:
-                    st.write("---")
-                    cols = st.columns(N_cards_per_row)
-                # draw the card
-                with cols[n_row%N_cards_per_row]:
-                    st.markdown(f"""
-                        <div class="card">
-                            <h4>{highlight_text(row['title'], text_search)}</h4>
-                            <p>{highlight_text(row['description'], text_search)}</p>
-                            <div class="card-footer">
-                                <span class="published-date">{row['published_date']}</span>
-                                <a href="{row['link']}" class="read-more">Read more</a>
-                            </div>
+    search_columns = ["title", "description", "title_ent", "description_ent"]
+    if lower_text_search:
+        df_search=df[df[search_columns].apply(
+            lambda col: col.str.contains(lower_text_search, na=False, case=False)
+        ).any(axis=1)]
+    else:
+        df_search = df
+
+    # Show the cards
+    N_cards_per_row = 4
+    if term:
+        for n_row, row in df_search.reset_index().iterrows():
+            i = n_row%N_cards_per_row
+            if i==0:
+                st.write("---")
+                cols = st.columns(N_cards_per_row)
+            # draw the card
+            with cols[n_row%N_cards_per_row]:
+                st.markdown(f"""
+                    <div class="card">
+                        <h4>{highlight_text(row['title'], term)}</h4>
+                        <p>{highlight_text(row['description'], term)}</p>
+                        <div class="card-footer">
+                            <span class="published-date">{row['published_date']}</span>
+                            <a href="{row['link']}" class="read-more">Read more</a>
                         </div>
-                    """, unsafe_allow_html=True)
-        else:
-            for n_row, row in df.reset_index().iterrows():
-                i = n_row%N_cards_per_row
-                if i==0:
-                    st.write("---")
-                    cols = st.columns(N_cards_per_row)
-                # draw the card
-                with cols[n_row%N_cards_per_row]:
-                    st.markdown(f"""
-                        <div class="card">
-                            <h4>{highlight_text(row['title'], text_search)}</h4>
-                            <p>{highlight_text(row['description'], text_search)}</p>
-                            <div class="card-footer">
-                                <span class="published-date">{row['published_date']}</span>
-                                <a href="{row['link']}" class="read-more">Read more</a>
-                            </div>
+                    </div>
+                """, unsafe_allow_html=True)
+    if term=="":
+        for n_row, row in df.reset_index().iterrows():
+            i = n_row%N_cards_per_row
+            if i==0:
+                st.write("---")
+                cols = st.columns(N_cards_per_row)
+            # draw the card
+            with cols[n_row%N_cards_per_row]:
+                st.markdown(f"""
+                    <div class="card">
+                        <h4>{highlight_text(row['title'], term)}</h4>
+                        <p>{highlight_text(row['description'], term)}</p>
+                        <div class="card-footer">
+                            <span class="published-date">{row['published_date']}</span>
+                            <a href="{row['link']}" class="read-more">Read more</a>
                         </div>
-                    """, unsafe_allow_html=True)
+                    </div>
+                """, unsafe_allow_html=True)
+
 
 
 
@@ -182,15 +251,12 @@ def data_process(df,key,stock_list):
 # Define the tab options
 all_news,moat_news = st.tabs(["All News", "Moat Stocks News"])
 
-# Use the Google Sheets export URL for CSV
-url = url_generator("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY","&sheet=Sheet1")
-moat_url=url_generator("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY","&gid=1812473852")
-moat_source=url_generator("1CbQQjrLPT25n2xnxuHRdOrI6K6MczA-Kh0BDraguniw","&sheet=Sheet1")
-
 # Read the CSV data from the Google Sheet
-all_df = pd.read_csv(url, dtype=str).fillna("")
-moat_df=pd.read_csv(moat_url,dtype=str).fillna("")
-moat_source=pd.read_csv(moat_source,dtype=str).fillna("")
+all_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY","&sheet=Sheet1")
+moat_df=load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY","&gid=1812473852")
+moat_source=load_data("1CbQQjrLPT25n2xnxuHRdOrI6K6MczA-Kh0BDraguniw","&sheet=Sheet1")
+
+
 
 
 
