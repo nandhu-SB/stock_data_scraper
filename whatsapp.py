@@ -12,6 +12,8 @@ st.markdown("""
     <style>
     body { font-family: 'Arial', sans-serif; }
     .stTitle { text-align: center; }
+    #MainEnu{visibility:hidden;}
+    #footer{visibility:hidden;}
     .card {
         border: 1px solid #D4AF37;
         border-radius: 15px;
