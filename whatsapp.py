@@ -152,7 +152,7 @@ def data_process(df, key, stock_list):
     search(df, text_search)
 
 def search(df, term=""):
-    search_columns = ["title", "description", "title_ent", "description_ent"]
+    search_columns = ["title", "description", "title_ent", "description_ent","source"]
     if term.strip():
         df_search = df[df[search_columns].apply(lambda col: col.str.contains(term, case=False, na=False)).any(axis=1)]
     else:
