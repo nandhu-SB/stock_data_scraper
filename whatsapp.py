@@ -158,7 +158,7 @@ def search(df, term=""):
     else:
         df_search = df
 
-    N_cards_per_row = 4
+    N_cards_per_row = 3
     for n_row, row in df_search.reset_index().iterrows():
         if n_row % N_cards_per_row == 0:
             cols = st.columns(N_cards_per_row)
