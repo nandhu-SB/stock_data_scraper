@@ -23,8 +23,8 @@ st.markdown(
         box-shadow: 0 10px 4px rgba(0, 0, 0, 0.5);
         z-index: 100;
     }
-    .main {
-        padding-top: 100px;  /* Prevents content from hiding behind the sticky header */
+    # .main {
+    #     padding-top: 100px;  /* Prevents content from hiding behind the sticky header */
     }
     </style>
     """,
