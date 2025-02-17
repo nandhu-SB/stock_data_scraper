@@ -42,6 +42,7 @@ st.markdown(
 )
 
 st.sidebar.header("Moat Stocks")
+#some comments
 
 # Retained and optimized CSS styling
 st.markdown("""
@@ -151,7 +152,7 @@ def data_process(df, key, stock_list):
     search(df, text_search)
 
 def search(df, term=""):
-    search_columns = ["title", "description", "title_ent", "description_ent","source"]
+    search_columns = ["title", "description", "title_ent", "description_ent", "source"]
     if term.strip():
         df_search = df[df[search_columns].apply(lambda col: col.str.contains(term, case=False, na=False)).any(axis=1)]
     else:
@@ -163,14 +164,15 @@ def search(df, term=""):
             cols = st.columns(N_cards_per_row)
         with cols[n_row % N_cards_per_row]:
             st.markdown(f"""
-                <div class="card">
-                    <h4>{highlight_text(row['title'], term)}</h4>
-                    <p>{highlight_text(row['description'], term)}</p>
-                    <div class="card-footer">
-                        <span class="published-date">{row['published_date']}</span>
-                        <a href="{row['link']}" target="_blank" class="read-more">Read more</a>
+                <a href="{row['link']}" target="_blank" style="text-decoration: none; color: inherit;">
+                    <div class="card">
+                        <h4>{highlight_text(row['title'], term)}</h4>
+                        <p>{highlight_text(row['description'], term)}</p>
+                        <div class="card-footer">
+                            <span class="published-date">{row['published_date']}</span>
+                        </div>
                     </div>
-                </div>
+                </a>
             """, unsafe_allow_html=True)
 
 all_df = load_data("14qjE9EblUbtHjVwQl-Dy9uuZM64MjsxeXg22x2biPmY", "&sheet=Sheet1",cache_key)  
